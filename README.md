@@ -1,3 +1,12 @@
+# Personal fork, unmaintained
+
+This is only worked on by me with regards to what works for me and my personal workflow
+and shared to help whoever it might help. 
+
+No active maintenance! No issues, no PRs. Sorry :)
+
+----
+
 # Marlin 3D Printer Firmware for BQ printers
 <img align="right" src="Documentation/Logo/Marlin%20Logo%20GitHub.png" />
 
