@@ -174,11 +174,9 @@ namespace temp
 			TCCR2B = 0x07;
 		}
 		
-		TCCR2A = 0x23;
+		TCCR2A = 0x03;
 
 		ADCSRA |= 0x08;
-		TCCR2A = 0x03;
-		TCCR2B = 0x07;
 
 		TIMSK2 = 0x01;
 	}
