@@ -301,9 +301,9 @@ void action_get_plane()
 	if(HeatedbedManager::single::instance().detected())
 	{
 		temp::TemperatureManager::single::instance().setBedTargetTemperature(0);
+		unsigned long curtime = millis();
 		while(HeatedbedManager::single::instance().detected() && temp::TemperatureManager::single::instance().getBedCurrentTemperature() > BED_AUTOLEVEL_TEMP)
 		{
-			unsigned long curtime = millis();
 			if(( millis() - curtime) > 1000 ) //Print Temp Reading every 1 second while heating up.
 			{
 				float tt=temp::TemperatureManager::single::instance().getCurrentTemperature();
