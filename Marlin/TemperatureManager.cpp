@@ -165,23 +165,22 @@ namespace temp
 	
 	void TemperatureManager::configureSetup()
 	{
+		TCCR2A = 0x03; // Fast PWM pt1
 #ifdef DOGLCD
 		if(HeatedbedManager::single::instance().detected())
 		{
-			TCCR2B = 0x0F;
-			OCR2A = 0x7F;
+			TCCR2B = 0x0F; // Fast PWM pt2, BOTTOM to TOP = OCR2A = 127
+			OCR2A = 0x7F;  // half of 255 = 50% duty cycle
 		}
 		else
 #endif // DOGLCD
 		{
-			TCCR2B = 0x07;
+			TCCR2B = 0x07; // Fast PWM pt2, BOTTOM to MAX = 255
 		}
-		
-		TCCR2A = 0x03;
 
-		ADCSRA |= 0x08;
-
-		TIMSK2 = 0x01;
+		// enable interrupts
+		ADCSRA |= 0x08; // ADC conversion complete
+		TIMSK2 = 0x01;  // timer overflow
 	}
 
 	void TemperatureManager::updateLUTCache()
@@ -459,7 +458,7 @@ static bool control_flag = false;
 
 #ifdef DOGLCD
 
-ISR(TIMER2_OVF_vect)
+ISR(TIMER2_OVF_vect) // TIMER2 Overflow
 {
 	static uint8_t temp_counter = 0;
 	static uint16_t bed_control_counter = 0;
@@ -473,7 +472,7 @@ ISR(TIMER2_OVF_vect)
 	temp_counter++;
 	if (temp_counter == 1)
 	{
-		ADCSRA |= 0x40;
+		ADCSRA |= 0x40;    // ADC Start Conversion
 		temp_counter = 0;
 	}
 #if MB(BQ_ZUM_MEGA_3D)
@@ -489,7 +488,7 @@ ISR(TIMER2_OVF_vect)
 #endif // MB(BQ_ZUM_MEGA_3D)
 }
 
-ISR(ADC_vect)
+ISR(ADC_vect) // ADC Conversion Complete
 {
 	static uint8_t	target_sensor = 0;
 
@@ -534,7 +533,7 @@ ISR(ADC_vect)
 			#if MB(BQ_ZUM_MEGA_3D)
 				if(HeatedbedManager::single::instance().detected())
 				{
-					ADMUX = 0x47;
+					ADMUX = 0x47; // heated bed sensor, ADC15
 					target_sensor = 1;
 				}
 			#endif MB(BQ_ZUM_MEGA_3D)
@@ -565,7 +564,7 @@ ISR(ADC_vect)
 					bed_accumulate = 0;
 				}
 				
-				ADMUX = 0x45; //hotend sensor
+				ADMUX = 0x45; //hotend sensor, ADC13
 				target_sensor = 0;
 				break;
 		#endif // MB(BQ_ZUM_MEGA_3D)
