@@ -76,6 +76,9 @@ namespace temp
 		if(HeatedbedManager::single::instance().detected())
 		{
 			SET_OUTPUT(HEATER_BED_PIN);
+
+			// we start with the bed OFF!
+			digitalWrite(HEATER_BED_PIN, HIGH);
 		}
 	#endif
 #endif // DOGLCD
@@ -174,11 +177,9 @@ namespace temp
 			TCCR2B = 0x07;
 		}
 		
-		TCCR2A = 0x23;
+		TCCR2A = 0x03;
 
 		ADCSRA |= 0x08;
-		TCCR2A = 0x03;
-		TCCR2B = 0x07;
 
 		TIMSK2 = 0x01;
 	}
@@ -479,8 +480,7 @@ ISR(TIMER2_OVF_vect)
 	if(HeatedbedManager::single::instance().getMode() != eeprom::HEATEDBED_OFF)
 	{
 		bed_control_counter++;
-		uint16_t bed_update_freq = F_CPU / (1024.0 * OCR2A * BED_UPDATES_PER_SEC);
-		if(bed_control_counter == bed_update_freq)
+		if(bed_control_counter == BED_UPDATE_FREQUENCY)
 		{
 			temp::TemperatureManager::single::instance().heatBed();
 			bed_control_counter = 0;			
