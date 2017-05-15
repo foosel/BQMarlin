@@ -504,7 +504,7 @@ ISR(ADC_vect) // ADC Conversion Complete
 	{
 		// //Hotend
 		case 0:	
-		accumulate += current_sample;
+				accumulate += current_sample;
 				sample_number++;
 
 				if (sample_number == OVERSAMPLENR)
@@ -515,12 +515,13 @@ ISR(ADC_vect) // ADC Conversion Complete
 					{
 						if ( accumulate < temp::TemperatureManager::single::instance().getRawLUTCache(i) )
 						{
-							float temperature = temp::TemperatureManager::single::instance().getTemperatureLUTCache(i-1) +
-								(accumulate - temp::TemperatureManager::single::instance().getRawLUTCache(i-1)) *
-								( (float) (temp::TemperatureManager::single::instance().getTemperatureLUTCache(i) - temp::TemperatureManager::single::instance().getTemperatureLUTCache(i-1)) ) /
-								( (float) (temp::TemperatureManager::single::instance().getRawLUTCache(i) - temp::TemperatureManager::single::instance().getRawLUTCache(i-1)) );
+							uint16_t fraction = (10 * (accumulate - temp::TemperatureManager::single::instance().getRawLUTCache(i-1))) /
+								(temp::TemperatureManager::single::instance().getRawLUTCache(i) - temp::TemperatureManager::single::instance().getRawLUTCache(i-1));
 
-							temp::TemperatureManager::single::instance().updateCurrentTemperature(temperature);
+							uint16_t temperature = temp::TemperatureManager::single::instance().getTemperatureLUTCache(i-1) * 10 +
+								fraction * (temp::TemperatureManager::single::instance().getTemperatureLUTCache(i) - temp::TemperatureManager::single::instance().getTemperatureLUTCache(i-1));
+
+							temp::TemperatureManager::single::instance().updateCurrentTemperature(temperature / 10);
 							break;
 						}
 					}
@@ -551,12 +552,13 @@ ISR(ADC_vect) // ADC Conversion Complete
 					{
 						if ( bed_accumulate < temp::TemperatureManager::single::instance().getBedRawLUTCache(i) )
 						{
-							float temperature = temp::TemperatureManager::single::instance().getBedTemperatureLUTCache(i-1) +
-								(bed_accumulate - temp::TemperatureManager::single::instance().getBedRawLUTCache(i-1)) *
-								( (float) (temp::TemperatureManager::single::instance().getBedTemperatureLUTCache(i) - temp::TemperatureManager::single::instance().getBedTemperatureLUTCache(i-1)) ) /
-								( (float) (temp::TemperatureManager::single::instance().getBedRawLUTCache(i) - temp::TemperatureManager::single::instance().getBedRawLUTCache(i-1)) );
-							
-							temp::TemperatureManager::single::instance().updateBedCurrentTemperature(temperature);
+							uint16_t fraction = (10 * (bed_accumulate - temp::TemperatureManager::single::instance().getBedRawLUTCache(i-1))) /
+								(temp::TemperatureManager::single::instance().getBedRawLUTCache(i) - temp::TemperatureManager::single::instance().getBedRawLUTCache(i-1));
+
+							uint16_t temperature = temp::TemperatureManager::single::instance().getBedTemperatureLUTCache(i-1) * 10 +
+								fraction * (temp::TemperatureManager::single::instance().getBedTemperatureLUTCache(i) - temp::TemperatureManager::single::instance().getBedTemperatureLUTCache(i-1));
+
+							temp::TemperatureManager::single::instance().updateBedCurrentTemperature(temperature / 10);
 							break;
 						}
 					}
